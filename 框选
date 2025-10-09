@@ -1,0 +1,30 @@
+import cv2
+
+# 1. 读取原图
+img = cv2.imread('test2.png')
+
+# 2. 转灰度图
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+# 3. 二值化（阈值处理）
+_, binary2 = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)
+
+# 4. 查找轮廓
+contours, _ = cv2.findContours(binary2, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+
+# 5. 绘制轮廓
+contour_img = img.copy()
+cv2.drawContours(contour_img, contours, -1, (0, 255, 0), 2)
+
+# 6.框选
+for contour in contours:
+    x, y, w, h = cv2.boundingRect(contour)
+    area=cv2.contourArea(contour)
+    cv2.rectangle(contour_img, (x, y), (x + w, y + h), (0, 0, 255), 1)
+# 7.过滤
+if area > 200 and (w/h >3 or h/w >3):
+    epsilon=0.03*cv2.arcLength(contour,True)
+    approx = cv2.approxPolyDP(contour,epsilon,True)
+cv2.imshow('contour', contour_img)
+cv2.imwrite("contour.png", contour_img)
+cv2.waitKey(0)
